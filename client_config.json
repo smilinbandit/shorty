@@ -1,0 +1,19 @@
+{
+  "smpp": {
+    "mode": "receiver",
+    "host": "localhost",
+    "port": 2776,
+    "system_id": "nodeunit",
+    "password": "nodeunit",
+    "system_type": "SHORTY",
+    "version": "3.4",
+    "addr_ton": 0,
+    "addr_npi": 1,
+    "addr_range": "",
+    "timeout": 30,
+    "strict": 1,
+    "client_keepalive": true,
+    "client_reconnect_interval": 2500
+  },
+  "debug":    true
+}
