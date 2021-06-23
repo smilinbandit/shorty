@@ -33,7 +33,7 @@ shortyServer.on('bind', function(pdu, client, callback) {
 });
 
 shortyServer.on('bindSuccess', function(client, pdu) {
-    console.log('bind success');
+    console.log('bind success, client_id: ' + pdu.system_id.toString());
 });
 
 shortyServer.on('deliver_sm_resp', function(client, pdu) {
@@ -41,11 +41,11 @@ shortyServer.on('deliver_sm_resp', function(client, pdu) {
 });
 
 shortyServer.on('unbind', function(client, pdu) {
-    console.log("client unbinding");
+    console.log("client unbinding: " + pdu.system_id.toString());
 });
 
 shortyServer.on('unbind_resp', function(client, pdu) {
-    console.log("client unbound");
+    console.log("client unbound: " + pdu.system_id.toString());
 });
 
 // client info, pdu info, callback(messageId, status)
@@ -53,8 +53,14 @@ shortyServer.on('submit_sm', function(clientInfo, pdu, callback) {
     var source = pdu.source_addr.toString('ascii'),
         dest = pdu.destination_addr.toString('ascii');
 
-    console.log(pdu.short_message.toString('ascii'));
-
+    console.log("submit_sm request: sendername: " + source + ", recipient: " + dest
+        + ", message: " + pdu.short_message.toString('ascii')
+        + ", message_length: " +pdu.sm_length.toString()
+        + ", sm_default_msg_id: " + pdu.sm_default_msg_id.toString()
+        + ", data_coding: " + pdu.data_coding.toString()
+        + ", registered_delivery: " + pdu.registered_delivery.toString()
+        + ", sequence_number: " + pdu.sequence_number.toString());
+    
     // Any messages sent from this number will fail
     if (pdu.sender === "15555551234") {
         // indicate failure
@@ -78,7 +84,7 @@ process.stdin.on('data', function(chunk) {
     // remove the newline at the end
     line = line.substr(0, line.length - 1);
 
-    // split by spaces
+    // split by spaces - to check the msisdn (recipient) part[1] and sendername part[0]
     parts = line.split(" ");
 
     // put the message back together
@@ -86,13 +92,19 @@ process.stdin.on('data', function(chunk) {
     for (i = 2; i < parts.length; i++) {
         message += parts[i] + " ";
     }
+    var deliver_sm_short_message = Buffer.from(message);
 
-    id = shortyServer.deliverMessage('SMSCLOUD', {
+    //make sure that the system ID you have configured in config.json is the one you are using to test dlr with
+    //took me quite a while to figure it out. The original value was "SMSCLOUD" replaced to be "nodeunit" inline with config.json
+    id = shortyServer.deliverMessage('nodeunit', {
         'source_addr': parts[0],
         'destination_addr': parts[1],
         'sm_length': Buffer.byteLength(message),
-        'short_message': new Buffer(message)
+        'short_message': deliver_sm_short_message
     });
+    //if deliver_sm_short_message format doesnt include dlvrd it will be marked as an incoming message
+    //initial developers didnt check this before implementing deliver_sm functionality
+    console.log("deliver_sm to client: " + deliver_sm_short_message);
 });
 
 var sighandle = function() {
