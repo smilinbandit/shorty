@@ -2,8 +2,10 @@
     "name": "shorty",
     "description": "An asynchronous SMPP client and server built on Node.js.",
     "version": "0.5.5",
-    "directories": { "lib": "./lib" },
-    "main" : "./lib/shorty",
+    "directories": {
+        "lib": "./lib"
+    },
+    "main": "./lib/shorty",
     "maintainers": [
         {
             "name": "Evan Coury",
@@ -29,5 +31,8 @@
             "type": "GPLv3",
             "url": "http://www.gnu.org/licenses/gpl-3.0.txt"
         }
-    ]
+    ],
+    "dependencies": {
+        "amqplib": "^0.8.0"
+    }
 }
